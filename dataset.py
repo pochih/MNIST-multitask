@@ -31,7 +31,7 @@ class MNIST(Dataset):
     label = np.zeros(self.n_class)
     label[cls] = 1
     label = torch.from_numpy(label).float()
-    image = np.array(self.data[idx][1:]).reshape(self.c, self.h, self.w).astype(np.float32)
+    image = np.array(self.data[idx][1:]).reshape(self.c, self.h, self.w).astype(np.float32) / 255.
     image = torch.from_numpy(image).float()
     return {
       'X': image,
@@ -60,7 +60,7 @@ class FashionMNIST(Dataset):
     label = np.zeros(self.n_class)
     label[cls] = 1
     label = torch.from_numpy(label).float()
-    image = np.array(self.data[idx][1:]).reshape(self.c, self.h, self.w).astype(np.float32)
+    image = np.array(self.data[idx][1:]).reshape(self.c, self.h, self.w).astype(np.float32) / 255.
     image = torch.from_numpy(image).float()
     return {
       'X': image,
@@ -96,7 +96,7 @@ class MNISTplusFashion(Dataset):
     label = np.zeros(self.n_class)
     label[cls] = 1
     label = torch.from_numpy(label).float()
-    image = np.array(self.data[idx][1:]).reshape(self.c, self.h, self.w).astype(np.float32)
+    image = np.array(self.data[idx][1:]).reshape(self.c, self.h, self.w).astype(np.float32) / 255.
     image = torch.from_numpy(image).float()
     return {
       'X': image,
