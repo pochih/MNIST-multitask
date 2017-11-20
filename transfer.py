@@ -74,8 +74,8 @@ val_loader   = DataLoader(val_data, batch_size=args.test_batch_size, shuffle=Fal
 if args.pre_trained:
   pretrained_model = torch.load(os.path.join(model_dir, params))
   pretrained_dict = pretrained_model.state_dict()
-  del pretrained_dict['classifier.weight']
-  del pretrained_dict['classifier.bias']
+  print(pretrained_dict['classifier.weight'].size())
+  print(pretrained_dict['classifier.bias'].size())
   print("Load pre-trained model")
 
 # use pre-trained weight
@@ -84,7 +84,7 @@ model_dict = model.state_dict()
 pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}  # filter out unnecessary keys
 model_dict.update(pretrained_dict)  # overwrite entries in the existing state dict
 model.load_state_dict(model_dict)  # load the new state dict
-params = "{}-{}-batch{}-epoch{}-lr{}-momentum{}-wdecay{}".format(args.target_dataset, args.optimizer, args.batch_size, args.epochs, args.lr, args.momentum, args.w_decay)
+params = "transfer-{}-{}-batch{}-epoch{}-lr{}-momentum{}-wdecay{}".format(args.target_dataset, args.optimizer, args.batch_size, args.epochs, args.lr, args.momentum, args.w_decay)
 
 # use GPU
 if args.cuda:

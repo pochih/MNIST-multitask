@@ -17,6 +17,14 @@ from torch.optim.lr_scheduler import MultiStepLR
 from dataset import MNIST, FashionMNIST, MNISTplusFashion
 from model import Multitask
 
+'''
+  F: 0.9359
+  M: 0.9934
+  M+F: 0.9614
+  M+F - M: 0.9947
+  M+F - F: 0.9261
+'''
+
 parser = argparse.ArgumentParser(description='PyTorch CNN Sentence Classification')
 # training configs
 parser.add_argument('--optimizer', type=str, default='Adam',
@@ -42,7 +50,7 @@ parser.add_argument('--log-interval', type=int, default=500,
 parser.add_argument('--pre-trained', type=int, default=0,
                     help='using pre-trained model or not (default: 0)')
 # data
-parser.add_argument('--dataset', type=str, default='M+F',
+parser.add_argument('--dataset', type=str, default='F',
                     help='current dataset')
 # device
 parser.add_argument('--cuda', type=int, default=1,
@@ -62,9 +70,9 @@ for dir in [result_dir, model_dir]:
     os.makedirs(dir)
 
 # load data
-train_data   = MNISTplusFashion(phase='train')
+train_data   = FashionMNIST(phase='train')
 train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=4)
-val_data     = MNISTplusFashion(phase='val')
+val_data     = FashionMNIST(phase='val')
 val_loader   = DataLoader(val_data, batch_size=args.test_batch_size, shuffle=False, num_workers=4)
 
 # get model
