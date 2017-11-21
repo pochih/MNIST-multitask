@@ -25,8 +25,8 @@ parser.add_argument('--batch-size', type=int, default=100,
                     help='input batch size for training (default: 100)')
 parser.add_argument('--test-batch-size', type=int, default=100,
                     help='input batch size for testing (default: 100)')
-parser.add_argument('--n-class', type=int, default=2,
-                    help='number of class (default: 2)')
+parser.add_argument('--n-class', type=int, default=10,
+                    help='number of class (default: 10)')
 parser.add_argument('--epochs', type=int, default=50,
                     help='number of epochs to train (default: 50)')
 parser.add_argument('--lr', type=float, default=1e-3,
@@ -35,8 +35,6 @@ parser.add_argument('--momentum', type=float, default=0.9,
                     help='SGD momentum (default: 0.9)')
 parser.add_argument('--w-decay', type=float, default=0.,
                     help='L2 norm (default: 0)')
-parser.add_argument('--seed', type=int, default=1,
-                    help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=500,
                     help='how many batches to wait before logging training status')
 parser.add_argument('--pre-trained', type=int, default=1,
@@ -44,7 +42,7 @@ parser.add_argument('--pre-trained', type=int, default=1,
 # data
 parser.add_argument('--source-dataset', type=str, default='M+F',
                     help='source dataset')
-parser.add_argument('--target-dataset', type=str, default='M',
+parser.add_argument('--target-dataset', type=str, default='F',
                     help='current dataset')
 # device
 parser.add_argument('--cuda', type=int, default=1,
@@ -65,26 +63,27 @@ for dir in [result_dir, model_dir]:
 accs = np.zeros(args.epochs)
 
 # load data
-train_data   = MNIST(phase='train')
+train_data   = FashionMNIST(phase='train')
 train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=4)
-val_data     = MNIST(phase='val')
+val_data     = FashionMNIST(phase='val')
 val_loader   = DataLoader(val_data, batch_size=args.test_batch_size, shuffle=False, num_workers=4)
 
 # load pre-trained model
 if args.pre_trained:
   pretrained_model = torch.load(os.path.join(model_dir, params))
   pretrained_dict = pretrained_model.state_dict()
-  print(pretrained_dict['classifier.weight'].size())
-  print(pretrained_dict['classifier.bias'].size())
-  print("Load pre-trained model")
+  if args.target_dataset == 'M':
+    pretrained_dict['classifier.weight'] = pretrained_dict['classifier.weight'][:10]
+    pretrained_dict['classifier.bias'] = pretrained_dict['classifier.bias'][:10]
+  elif args.target_dataset == 'F':
+    pretrained_dict['classifier.weight'] = pretrained_dict['classifier.weight'][10:]
+    pretrained_dict['classifier.bias'] = pretrained_dict['classifier.bias'][10:]
+  print("Load pre-trained model", params)
 
 # use pre-trained weight
 model = Multitask(n_class=train_data.n_class)
-model_dict = model.state_dict()
-pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}  # filter out unnecessary keys
-model_dict.update(pretrained_dict)  # overwrite entries in the existing state dict
-model.load_state_dict(model_dict)  # load the new state dict
-params = "transfer-{}-{}-batch{}-epoch{}-lr{}-momentum{}-wdecay{}".format(args.target_dataset, args.optimizer, args.batch_size, args.epochs, args.lr, args.momentum, args.w_decay)
+model.load_state_dict(pretrained_dict)  # load the state dict
+params = "transfer-{}to{}-{}-batch{}-epoch{}-lr{}-momentum{}-wdecay{}".format(args.source_dataset, args.target_dataset, args.optimizer, args.batch_size, args.epochs, args.lr, args.momentum, args.w_decay)
 
 # use GPU
 if args.cuda:
