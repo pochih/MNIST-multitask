@@ -18,11 +18,11 @@ from dataset import MNIST, FashionMNIST, MNISTplusFashion
 from model import Multitask
 
 '''
-  F: 0.9359
-  M: 0.9934
-  M+F: 0.9614
-  M+F - M: 0.9947
-  M+F - F: 0.9261
+  F: 0.9359, 0.9374, 0.9363, 0.9394
+  M: 0.9934, 0.9953, 0.996, 0.993
+  M+F: 0.9614, 0.9658
+  M+F -> M: 0.9947, 0.9956, 0.9928
+  M+F -> F: 0.9261, 0.9373, 0.9383, 0.942
 '''
 
 parser = argparse.ArgumentParser(description='PyTorch CNN Sentence Classification')
@@ -33,8 +33,8 @@ parser.add_argument('--batch-size', type=int, default=100,
                     help='input batch size for training (default: 100)')
 parser.add_argument('--test-batch-size', type=int, default=100,
                     help='input batch size for testing (default: 100)')
-parser.add_argument('--n-class', type=int, default=2,
-                    help='number of class (default: 2)')
+parser.add_argument('--n-class', type=int, default=10,
+                    help='number of class (default: 10)')
 parser.add_argument('--epochs', type=int, default=50,
                     help='number of epochs to train (default: 50)')
 parser.add_argument('--lr', type=float, default=1e-3,
@@ -43,14 +43,12 @@ parser.add_argument('--momentum', type=float, default=0.9,
                     help='SGD momentum (default: 0.9)')
 parser.add_argument('--w-decay', type=float, default=0.,
                     help='L2 norm (default: 0)')
-parser.add_argument('--seed', type=int, default=1,
-                    help='random seed (default: 1)')
 parser.add_argument('--log-interval', type=int, default=500,
                     help='how many batches to wait before logging training status')
 parser.add_argument('--pre-trained', type=int, default=0,
                     help='using pre-trained model or not (default: 0)')
 # data
-parser.add_argument('--dataset', type=str, default='F',
+parser.add_argument('--dataset', type=str, default='M+F',
                     help='current dataset')
 # device
 parser.add_argument('--cuda', type=int, default=1,
@@ -70,9 +68,9 @@ for dir in [result_dir, model_dir]:
     os.makedirs(dir)
 
 # load data
-train_data   = FashionMNIST(phase='train')
+train_data   = MNISTplusFashion(phase='train')
 train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=4)
-val_data     = FashionMNIST(phase='val')
+val_data     = MNISTplusFashion(phase='val')
 val_loader   = DataLoader(val_data, batch_size=args.test_batch_size, shuffle=False, num_workers=4)
 
 # get model
