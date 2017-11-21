@@ -2,12 +2,14 @@
 
 from __future__ import print_function
 
+from matplotlib import pyplot as plt
 import numpy as np
 import random
 import os
 
 import torch
 from torch.utils.data import Dataset, DataLoader
+from torchvision import utils
 
 
 class MNIST(Dataset):
@@ -16,12 +18,14 @@ class MNIST(Dataset):
   c, h, w = 1, 28, 28
   n_class = 10
 
-  def __init__(self, phase):
+  def __init__(self, phase, flip_rate=0.5):
     if phase == 'train':
       self.data = open(os.path.join(self.data_dir, 'mnist_train.csv'), 'r').read().split('\n')[:-1]
     elif phase == 'val':
       self.data = open(os.path.join(self.data_dir, 'mnist_test.csv'), 'r').read().split('\n')[:-1]
     self.data = [d.split(',') for d in self.data]
+
+    self.flip_rate = flip_rate
 
   def __len__(self):
     return len(self.data)
@@ -30,9 +34,15 @@ class MNIST(Dataset):
     cls   = int(self.data[idx][0])
     label = np.zeros(self.n_class)
     label[cls] = 1
-    label = torch.from_numpy(label).float()
-    image = np.array(self.data[idx][1:]).reshape(self.c, self.h, self.w).astype(np.float32) / 255.
-    image = torch.from_numpy(image).float()
+    image = np.array(self.data[idx][1:]).reshape(self.h, self.w).astype(np.float32) / 255.
+
+    if random.random() < self.flip_rate:
+      image = np.fliplr(image)
+
+    image = image.reshape(self.c, self.h, self.w)
+
+    label = torch.from_numpy(label.copy()).float()
+    image = torch.from_numpy(image.copy()).float()
     return {
       'X': image,
       'Y': label
@@ -45,12 +55,14 @@ class FashionMNIST(Dataset):
   c, h, w = 1, 28, 28
   n_class = 10
 
-  def __init__(self, phase):
+  def __init__(self, phase, flip_rate=0.5):
     if phase == 'train':
       self.data = open(os.path.join(self.data_dir, 'fashion-mnist_train.csv'), 'r').read().split('\n')[1:-1]
     elif phase == 'val':
       self.data = open(os.path.join(self.data_dir, 'fashion-mnist_test.csv'), 'r').read().split('\n')[1:-1]
     self.data = [d.split(',') for d in self.data]
+
+    self.flip_rate = flip_rate
 
   def __len__(self):
     return len(self.data)
@@ -59,9 +71,15 @@ class FashionMNIST(Dataset):
     cls   = int(self.data[idx][0])
     label = np.zeros(self.n_class)
     label[cls] = 1
-    label = torch.from_numpy(label).float()
-    image = np.array(self.data[idx][1:]).reshape(self.c, self.h, self.w).astype(np.float32) / 255.
-    image = torch.from_numpy(image).float()
+    image = np.array(self.data[idx][1:]).reshape(self.h, self.w).astype(np.float32) / 255.
+
+    if random.random() < self.flip_rate:
+      image = np.fliplr(image)
+
+    image = image.reshape(self.c, self.h, self.w)
+
+    label = torch.from_numpy(label.copy()).float()
+    image = torch.from_numpy(image.copy()).float()
     return {
       'X': image,
       'Y': label
@@ -75,7 +93,7 @@ class MNISTplusFashion(Dataset):
   c, h, w = 1, 28, 28
   n_class = 20
 
-  def __init__(self, phase):
+  def __init__(self, phase, flip_rate=0.5):
     if phase == 'train':
       self.dataM = open(os.path.join(self.data_dirM, 'mnist_train.csv'), 'r').read().split('\n')[:-1]
       self.dataF = open(os.path.join(self.data_dirF, 'fashion-mnist_train.csv'), 'r').read().split('\n')[1:-1]
@@ -88,6 +106,8 @@ class MNISTplusFashion(Dataset):
       self.dataF[idx][0] = int(self.dataF[idx][0]) + 10
     self.data = self.dataM + self.dataF
 
+    self.flip_rate = flip_rate
+
   def __len__(self):
     return len(self.data)
 
@@ -95,13 +115,29 @@ class MNISTplusFashion(Dataset):
     cls   = int(self.data[idx][0])
     label = np.zeros(self.n_class)
     label[cls] = 1
-    label = torch.from_numpy(label).float()
-    image = np.array(self.data[idx][1:]).reshape(self.c, self.h, self.w).astype(np.float32) / 255.
-    image = torch.from_numpy(image).float()
+    image = np.array(self.data[idx][1:]).reshape(self.h, self.w).astype(np.float32) / 255.
+
+    if random.random() < self.flip_rate:
+      image = np.fliplr(image)
+
+    image = image.reshape(self.c, self.h, self.w)
+
+    label = torch.from_numpy(label.copy()).float()
+    image = torch.from_numpy(image.copy()).float()
     return {
       'X': image,
       'Y': label
     }
+
+
+def show_batch(batch):
+    img_batch = batch['X']
+    img_batch[:,0,...].mul_(1)
+
+    grid = utils.make_grid(img_batch)
+    plt.imshow(grid.numpy().transpose((1, 2, 0)))
+
+    plt.title('Batch from dataloader')
 
 
 if __name__ == "__main__":
@@ -121,5 +157,10 @@ if __name__ == "__main__":
     assert batch['X'].size()[0] == batch_size
     assert batch['Y'].size()[0] == batch_size
     if idx == 3:
+      plt.figure()
+      show_batch(batch)
+      plt.axis('off')
+      plt.ioff()
+      plt.show()
       break
   print("Pass Test")
