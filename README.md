@@ -4,10 +4,10 @@ Reproduce ICLR2018 under-reviewed paper [MULTI-TASK LEARNING ON MNIST IMAGE DATA
 the paper argues that pre-train network with MNIST-like dataset can boost performance
 
 ### results
-dataset | single-task | F+N | single-task (paper reported) | F+N (paper reported)
+dataset | single-task | M+F | single-task (paper reported) | M+F (paper reported)
 --- | --- | --- | --- | --- 
 MNIST | 0.996 | 0.9956 | 0.9956 | 0.9971
-FashionMNIST | 0.9394 | 0.942 | 0.9432 | 0.9520
+FashionMNIST | 0.9394 | 0.942 | 0.9432 | 0.9518
 
 ### discussion
 in my reproduction, FashionMNIST performs better with MNIST+FashionMNIST pre-trained first
