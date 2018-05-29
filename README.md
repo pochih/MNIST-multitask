@@ -15,3 +15,6 @@ in my reproduction, FashionMNIST performs better with MNIST+FashionMNIST pre-tra
 but MNIST doesn't enjoy the benefits of pre-training.
 
 The bias between reproduction and paper can result from preprocess of data.
+
+## Author
+Po-Chih Huang / [@pochih](http://pochih.github.io/)
